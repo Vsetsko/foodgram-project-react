@@ -8,7 +8,7 @@ from rest_framework.response import Response
 
 from users.permissions import IsAuthorOrReadOnly
 from .filters import IngredientFilter, RecipeFilter
-from .mixins import add_del_recipe
+from .mixins import ModelMixin
 from .models import Favorite, Ingredient, Recipe, ShoppingList, Tag
 from .pagination import SimplePagination
 from .serializers import (CreateRecipeSerializer, FavoriteSerializer,
@@ -38,17 +38,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk):
         """ Добавление/удаление рецепта из избранного. """
-        model = Favorite
         serializer = FavoriteSerializer
-        return add_del_recipe(request, pk, serializer, model)
+        return ModelMixin().add_del_recipe(request, pk, serializer, Favorite)
 
     @action(detail=True, methods=['POST', 'DELETE'],
             permission_classes=[IsAuthenticated],)
     def shopping_cart(self, request, pk):
         """ Добавление/удаление рецепта из списка покупок. """
-        model = ShoppingList
         serializer = ShoppingListSerializer
-        return add_del_recipe(request, pk, serializer, model)
+        return ModelMixin().add_del_recipe(request, pk, serializer, ShoppingList)
 
     @action(detail=False, permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):

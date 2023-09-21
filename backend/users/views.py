@@ -25,11 +25,6 @@ class UserViewSet(UserViewSet):
         subscriber = request.user
 
         if request.method == 'POST':
-            subscribed = (Subscription.objects.filter(
-                author=author, user=subscriber).exists()
-            )
-            if subscribed:
-                return Response(status=status.HTTP_400_BAD_REQUEST)
             Subscription.objects.get_or_create(
                 user=subscriber,
                 author=author
@@ -51,8 +46,7 @@ class UserViewSet(UserViewSet):
     @action(detail=False, methods=['GET'],
             permission_classes=[IsAuthenticated])
     def subscriptions(self, request):
-        current_user = request.user
-        queryset = User.objects.filter(author__user=current_user)
+        queryset = User.objects.filter(author__user=request.user)
         authors = self.paginate_queryset(queryset)
         serializer = ListSerializer(
             child=SubscribeSerializer(),

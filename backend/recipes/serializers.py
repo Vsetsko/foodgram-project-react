@@ -61,11 +61,10 @@ class RecipeSerializer(ModelSerializer):
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
-        return Favorite.objects.filter(
-            user=request.user, recipe_id=obj
-        ).exists()
+        return False if request is (
+            None or request.user.is_anonymous
+        ) else Favorite.objects.filter(user=request.user,
+                                       recipe_id=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
@@ -105,17 +104,17 @@ class CreateRecipeSerializer(ModelSerializer):
         ]
 
     def validate_ingredients(self, data):
-        ingredient_int = []
+        ingredients = []
         for ingredient in data:
             if int(ingredient['amount']) < 1:
                 raise serializers.ValidationError({
-                    'amount': 'Должен быть хотя бы 1 ингредиент'
+                    'amount': 'Должна быть хотя бы 1 единица ингредиента'
                 })
-            if ingredient['id'] in ingredient_int:
+            if ingredient['id'] in ingredients:
                 raise serializers.ValidationError({
                     'ingredient': 'Ингредиенты не должны повторяться'
                 })
-            ingredient_int.append(ingredient['id'])
+            ingredients.append(ingredient['id'])
         return data
 
     def create_ingredients(self, ingredients, recipe):
@@ -159,14 +158,14 @@ class CreateRecipeSerializer(ModelSerializer):
         }).data
 
 
-class FavoriteSerializer(RecipeSerializer):
+class FavoriteSerializer():
     """ Сериализатор избранного. """
 
     name = ReadOnlyField()
     cooking_time = ReadOnlyField()
 
     class Meta(RecipeSerializer.Meta):
-        fields = ("id", "name", "cooking_time")
+        fields = ('id', 'name', 'cooking_time')
 
     def validate(self, data):
         recipe = self.instance
@@ -178,6 +177,11 @@ class FavoriteSerializer(RecipeSerializer):
             )
         return data
 
+    def to_representation(self, instance):
+        return RecipeSerializer(instance, context={
+            'request': self.context.get('request')
+        }).data
+
 
 class ShoppingListSerializer(RecipeSerializer):
     """ Сериализатор списка покупок. """
@@ -186,7 +190,7 @@ class ShoppingListSerializer(RecipeSerializer):
     cooking_time = ReadOnlyField()
 
     class Meta(RecipeSerializer.Meta):
-        fields = ("id", "name", "cooking_time")
+        fields = ('id', 'name', 'cooking_time')
 
     def validate(self, data):
         recipe = self.instance

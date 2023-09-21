@@ -73,7 +73,13 @@ class SubscribeSerializer(UserSerializer):
         recipes = Recipe.objects.filter(author=obj)
         limit = request.query_params.get('recipes_limit')
         if limit:
-            recipes = recipes[:int(limit)]
+            try:
+                recipes = recipes[:int(limit)]
+            except ValueError:
+                raise serializers.ValidationError(
+                    'Не удалось получить рецепты',
+                    code=status.HTTP_400_BAD_REQUEST
+                )
         return CropRecipeSerializer(recipes, many=True,
                                     context={'request': request}).data
 

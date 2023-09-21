@@ -1,16 +1,30 @@
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import (CASCADE, CharField, DateTimeField, ForeignKey,
                               ImageField, ManyToManyField, Model,
                               PositiveSmallIntegerField, SlugField, TextField,
                               UniqueConstraint)
 
 from users.models import User
+from validators import validate_hex
+
+
+ENTER_INGREDIENT_NAME = 'Название ингредиента'
+ENTER_TAG = 'Название тега'
+ENTER_HEX = 'HEX-код цвета'
+ENTER_SLUG = 'Slug'
+ENTER_UNIT = 'Единица измерения'
+ENTER_IMAGE = 'Изображение'
+ENTER_DESCRIPTION = 'Описание'
+ENTER_COOKING_TIME = 'Время приготовления'
+ENTER_TIME_CREATION = 'Дата и время создания'
+ENTER_QUANTITY_INGREDIENTS = 'Количество ингредиентов'
 
 
 class Ingredient(Model):
     """ Модель ингредиента. """
 
-    name = CharField('Название ингредиента', max_length=200)
-    measurement_unit = CharField('Единица измерения', max_length=20)
+    name = CharField(ENTER_INGREDIENT_NAME, max_length=200)
+    measurement_unit = CharField(ENTER_UNIT, max_length=20)
 
     class Meta:
         ordering = ['name']
@@ -27,9 +41,9 @@ class Ingredient(Model):
 class Tag(Model):
     """ Модель тега """
 
-    name = CharField('Название тега', max_length=22)
-    color = CharField('HEX-код цвета', max_length=7)
-    slug = SlugField('Slug', unique=True, max_length=200)
+    name = CharField(ENTER_TAG, max_length=22)
+    color = CharField(ENTER_HEX, max_length=7, validators=[validate_hex])
+    slug = SlugField(ENTER_SLUG, unique=True, max_length=200)
 
     class Meta:
         ordering = ['name']
@@ -49,9 +63,9 @@ class Recipe(Model):
         verbose_name='Автор рецепта',
         related_name='recipes'
     )
-    name = CharField('Название рецепта', max_length=200)
-    image = ImageField('Изображение', upload_to='recipes/images/')
-    text = TextField('Описание', max_length=500)
+    name = CharField(ENTER_INGREDIENT_NAME, max_length=200)
+    image = ImageField(ENTER_IMAGE, upload_to='recipes/images/')
+    text = TextField(ENTER_DESCRIPTION, max_length=500)
     ingredients = ManyToManyField(
         Ingredient,
         through='RecipeIngredient',
@@ -64,8 +78,13 @@ class Recipe(Model):
         verbose_name='Теги',
         related_name='tags'
     )
-    cooking_time = PositiveSmallIntegerField('Время приготовления')
-    created = DateTimeField('Дата и время создания', auto_now_add=True)
+    cooking_time = PositiveSmallIntegerField(
+        ENTER_COOKING_TIME, validators=[
+            MaxValueValidator(4320),
+            MinValueValidator(1)
+        ]
+    )
+    created = DateTimeField(ENTER_TIME_CREATION, auto_now_add=True)
 
     class Meta:
         verbose_name = 'Рецепт'
@@ -91,7 +110,7 @@ class RecipeIngredient(Model):
         verbose_name='Ингредиент',
         related_name='recipe_ingredients'
     )
-    amount = PositiveSmallIntegerField('Количество ингредиентов')
+    amount = PositiveSmallIntegerField(ENTER_QUANTITY_INGREDIENTS)
 
     class Meta:
         constraints = [
