@@ -1,5 +1,8 @@
 # Foodgram - продуктовый помощник.
 
+![Workflow](https://github.com/Vsetsko/foodgram-project-react/actions/workflows/main.yml/badge.svg)
+Проект расположен на домене: 84.201.161.4
+
 ## Описание проекта
 На сайте пользователи могут публиковать кулинарные рецепты, подписываться 
 на публикации рецептов других пользователей, добавлять понравившиеся рецепты в список 
@@ -49,7 +52,7 @@
     cd foodgram
     ```
 
-3. В директорию foodgram/ скопируйте или создайте файл .env:
+3. В директорию foodgram/infra/ создайте файл .env(Пример заполнения находится в файле .env.example):
 
     ```bash
     scp -i <path_to_SSH/SSH_name> .env <username@server_ip>:/home/<username>/foodgram/.env
