@@ -46,7 +46,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk):
         """ Добавление/удаление рецепта из списка покупок. """
         serializer = ShoppingListSerializer
-        return ModelMixin().add_del_recipe(request, pk, serializer, ShoppingList)
+        return ModelMixin().add_del_recipe(
+            request, pk, serializer, ShoppingList
+        )
 
     @action(detail=False, permission_classes=[IsAuthenticated])
     def download_shopping_cart(self, request):
