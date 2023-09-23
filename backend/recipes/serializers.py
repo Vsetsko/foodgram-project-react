@@ -61,10 +61,10 @@ class RecipeSerializer(ModelSerializer):
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
-        return False if request is (
-            None or request.user.is_anonymous
-        ) else Favorite.objects.filter(user=request.user,
-                                       recipe_id=obj).exists()
+        return (
+            False if request is None or request.user.is_anonymous
+            else request.user.favorites.filter(recipe_id=obj).exists()
+        )
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
@@ -143,8 +143,8 @@ class CreateRecipeSerializer(ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        RecipeTag.objects.filter(recipe=instance).delete()
-        RecipeIngredient.objects.filter(recipe=instance).delete()
+        instance.recipe_tag.clear()
+        instance.recipe_ingredients.clear()
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
         instance = super().update(instance, validated_data)
@@ -158,21 +158,17 @@ class CreateRecipeSerializer(ModelSerializer):
         }).data
 
 
-class FavoriteSerializer():
+class FavoriteSerializer(ModelSerializer):
     """ Сериализатор избранного. """
 
-    name = ReadOnlyField()
-    cooking_time = ReadOnlyField()
-
     class Meta(RecipeSerializer.Meta):
-        fields = ('id', 'name', 'cooking_time')
+        fields = ('name', 'cooking_time')
 
     def validate(self, data):
-        recipe = self.instance
-        user = self.context.get('request').user
-        if Favorite.objects.filter(recipe=recipe, user=user).exists():
+        user = data['user']
+        if user.favorites.filter(recipe=data['recipe']).exists():
             raise serializers.ValidationError(
-                detail='Рецепт уже добавлен в избранное',
+                'Рецепт уже добавлен в избранное.',
                 code=status.HTTP_400_BAD_REQUEST,
             )
         return data
@@ -186,16 +182,12 @@ class FavoriteSerializer():
 class ShoppingListSerializer(RecipeSerializer):
     """ Сериализатор списка покупок. """
 
-    name = ReadOnlyField()
-    cooking_time = ReadOnlyField()
-
     class Meta(RecipeSerializer.Meta):
-        fields = ('id', 'name', 'cooking_time')
+        fields = ('name', 'cooking_time')
 
     def validate(self, data):
-        recipe = self.instance
-        user = self.context.get('request').user
-        if ShoppingList.objects.filter(recipe=recipe, user=user).exists():
+        user = data['user']
+        if user.shopping.filter(recipe=data['recipe']).exists():
             raise serializers.ValidationError(
                 'Рецепт уже добавлен в корзину',
                 code=status.HTTP_400_BAD_REQUEST,

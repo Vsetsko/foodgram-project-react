@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from .models import Recipe
 
 
-class ModelMixin:
+class AddDelMixin:
     def add_del_recipe(request, pk, serializer, model):
         recipe = get_object_or_404(Recipe, pk=pk)
         user = request.user
@@ -15,13 +15,17 @@ class ModelMixin:
                 recipe, data=request.data, context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
-            model.objects.save(user=user, recipe=recipe)
+            serializer(model.objects.create(user=user, recipe=recipe)).save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            model.objects.filter(
+            queryset = model.objects.filter(
                 user=user,
                 recipe=recipe
-            ).delete()
+            )
+            if queryset.exists():
+                queryset.delete()
+            else:
+                return Response(status=status.HTTP_404_NOT_FOUND)
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)

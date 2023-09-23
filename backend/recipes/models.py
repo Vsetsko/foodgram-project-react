@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db.models import (CASCADE, CharField, DateTimeField, ForeignKey,
                               ImageField, ManyToManyField, Model,
@@ -8,23 +9,16 @@ from users.models import User
 from validators import validate_hex
 
 
-ENTER_INGREDIENT_NAME = 'Название ингредиента'
-ENTER_TAG = 'Название тега'
-ENTER_HEX = 'HEX-код цвета'
-ENTER_SLUG = 'Slug'
-ENTER_UNIT = 'Единица измерения'
-ENTER_IMAGE = 'Изображение'
-ENTER_DESCRIPTION = 'Описание'
-ENTER_COOKING_TIME = 'Время приготовления'
-ENTER_TIME_CREATION = 'Дата и время создания'
-ENTER_QUANTITY_INGREDIENTS = 'Количество ингредиентов'
-
-
 class Ingredient(Model):
     """ Модель ингредиента. """
 
-    name = CharField(ENTER_INGREDIENT_NAME, max_length=200)
-    measurement_unit = CharField(ENTER_UNIT, max_length=20)
+    name = CharField(
+        settings.ENTER_INGREDIENT_NAME,
+        max_length=settings.MAX_LENGTH_INGREDIENT_NAME
+    )
+    measurement_unit = CharField(
+        settings.ENTER_UNIT, max_length=settings.MAX_LENGTH_INGREDIENT_UNIT
+    )
 
     class Meta:
         ordering = ['name']
@@ -37,13 +31,21 @@ class Ingredient(Model):
             )
         ]
 
+    def __str__(self) -> str:
+        return f"{self.name} {self.measurement_unit}"
+
 
 class Tag(Model):
     """ Модель тега """
 
-    name = CharField(ENTER_TAG, max_length=22)
-    color = CharField(ENTER_HEX, max_length=7, validators=[validate_hex])
-    slug = SlugField(ENTER_SLUG, unique=True, max_length=200)
+    name = CharField(settings.ENTER_TAG,
+                     max_length=settings.MAX_LENGTH_TAG_NAME)
+    color = CharField(
+        settings.ENTER_HEX,
+        max_length=settings.MAX_LENGTH_TAG_COLOR, validators=[validate_hex]
+    )
+    slug = SlugField(settings.ENTER_SLUG, unique=True,
+                     max_length=settings.MAX_LENGTH_TAG_SLUG)
 
     class Meta:
         ordering = ['name']
@@ -63,9 +65,10 @@ class Recipe(Model):
         verbose_name='Автор рецепта',
         related_name='recipes'
     )
-    name = CharField(ENTER_INGREDIENT_NAME, max_length=200)
-    image = ImageField(ENTER_IMAGE, upload_to='recipes/images/')
-    text = TextField(ENTER_DESCRIPTION, max_length=500)
+    name = CharField(settings.ENTER_INGREDIENT_NAME,
+                     max_length=settings.MAX_LENGTH_RECIPE_NAME)
+    image = ImageField(settings.ENTER_IMAGE, upload_to='recipes/images/')
+    text = TextField(settings.ENTER_DESCRIPTION)
     ingredients = ManyToManyField(
         Ingredient,
         through='RecipeIngredient',
@@ -79,12 +82,12 @@ class Recipe(Model):
         related_name='tags'
     )
     cooking_time = PositiveSmallIntegerField(
-        ENTER_COOKING_TIME, validators=[
-            MaxValueValidator(4320),
-            MinValueValidator(1)
+        settings.ENTER_COOKING_TIME, validators=[
+            MaxValueValidator(settings.MAX_VALUE_COOKING_TIME),
+            MinValueValidator(settings.MIN_VALUE_COOKING_TIME)
         ]
     )
-    created = DateTimeField(ENTER_TIME_CREATION, auto_now_add=True)
+    created = DateTimeField(settings.ENTER_TIME_CREATION, auto_now_add=True)
 
     class Meta:
         verbose_name = 'Рецепт'
@@ -110,7 +113,7 @@ class RecipeIngredient(Model):
         verbose_name='Ингредиент',
         related_name='recipe_ingredients'
     )
-    amount = PositiveSmallIntegerField(ENTER_QUANTITY_INGREDIENTS)
+    amount = PositiveSmallIntegerField(settings.ENTER_QUANTITY_INGREDIENTS)
 
     class Meta:
         constraints = [
@@ -120,6 +123,9 @@ class RecipeIngredient(Model):
             )
         ]
 
+    def __str__(self) -> str:
+        return f"{self.recipe} {self.ingredient}"
+
 
 class RecipeTag(Model):
     """ Модель связи рецепта и тега. """
@@ -127,7 +133,8 @@ class RecipeTag(Model):
     recipe = ForeignKey(
         Recipe,
         on_delete=CASCADE,
-        verbose_name='Рецепт'
+        verbose_name='Рецепт',
+        related_name='recipe_tag'
     )
     tag = ForeignKey(
         Tag,
@@ -142,6 +149,9 @@ class RecipeTag(Model):
                 name='recipe_tag_unique'
             )
         ]
+
+    def __str__(self) -> str:
+        return f"{self.recipe} {self.tag}"
 
 
 class Favorite(Model):
@@ -170,6 +180,9 @@ class Favorite(Model):
             )
         ]
 
+    def __str__(self) -> str:
+        return f"{self.user} -> {self.recipe}"
+
 
 class ShoppingList(Model):
     """ Модель списка покупок. """
@@ -196,3 +209,6 @@ class ShoppingList(Model):
                 name='shopping_unique'
             )
         ]
+
+    def __str__(self) -> str:
+        return f"{self.user} -> {self.recipe}"

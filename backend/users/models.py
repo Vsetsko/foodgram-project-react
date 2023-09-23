@@ -1,7 +1,9 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.validators import UnicodeUsernameValidator
-from django.db.models import (CASCADE, CharField, EmailField, ForeignKey,
-                              Model, UniqueConstraint)
+from django.db import models
+from django.db.models import (CASCADE, CharField, EmailField, F, ForeignKey,
+                              Model, Q, UniqueConstraint)
 
 
 class User(AbstractUser):
@@ -9,20 +11,20 @@ class User(AbstractUser):
 
     first_name = CharField(
         'Имя',
-        max_length=50
+        max_length=settings.LENGTH_OF_FIELDS_USER
     )
     last_name = CharField(
         'Фамилия',
-        max_length=50
+        max_length=settings.LENGTH_OF_FIELDS_USER
     )
     email = EmailField(
         'Электронная почта',
-        max_length=128,
+        max_length=settings.LENGTH_OF_FIELDS_USER,
         unique=True
     )
     username = CharField(
         'Имя пользователя',
-        max_length=128,
+        max_length=settings.LENGTH_OF_FIELDS_USERNAME,
         unique=True,
         validators=[UnicodeUsernameValidator(
             message='Имя пользователя не соответсвует стандартам Unicode'
@@ -56,6 +58,10 @@ class Subscription(Model):
             UniqueConstraint(
                 fields=['user', 'author'],
                 name='subscription_unique'
+            ),
+            models.CheckConstraint(
+                check=~Q(user=F('author')),
+                name='self_follow'
             )
         ]
 

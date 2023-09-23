@@ -25,23 +25,21 @@ class UserViewSet(UserViewSet):
         subscriber = request.user
 
         if request.method == 'POST':
-            Subscription.objects.get_or_create(
-                user=subscriber,
-                author=author
-            )
             serializer = SubscribeSerializer(
                 context=self.get_serializer_context()
             )
+            serializer(Subscription.objects.get_or_create(
+                user=subscriber,
+                author=author
+            )).save()
             return Response(serializer.to_representation(
                 instance=author),
                 status=status.HTTP_201_CREATED
             )
-        if request.method == 'DELETE':
-            Subscription.objects.filter(
-                user=subscriber, author=author
-            ).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(status=status.HTTP_400_BAD_REQUEST)
+        Subscription.objects.filter(
+            user=subscriber, author=author
+        ).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=False, methods=['GET'],
             permission_classes=[IsAuthenticated])

@@ -1,12 +1,12 @@
-from djoser.serializers import UserCreateSerializer, UserSerializer
+from djoser.serializers import UserSerializer
 from rest_framework import serializers, status
-from rest_framework.serializers import SerializerMethodField
+from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from recipes.models import Recipe
 from .models import Subscription, User
 
 
-class CustomUserSerializer(UserSerializer):
+class CustomUserSerializer(ModelSerializer):
     """ Сериализатор пользователя. """
 
     is_subscribed = SerializerMethodField(read_only=True)
@@ -20,21 +20,10 @@ class CustomUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        return user.subscriber.filter(author=obj).exists()
-
-
-class CustomUserCreateSerializer(UserCreateSerializer):
-    """ Сериализатор создания пользователя. """
-
-    password = serializers.CharField(write_only=True)
-
-    class Meta:
-        model = User
-        fields = [
-            'email', 'username', 'first_name', 'last_name', 'password'
-        ]
+        return (
+            not user.is_anonymous
+            and user.subscriber.filter(author=obj).exists()
+        )
 
 
 class CropRecipeSerializer(serializers.ModelSerializer):
@@ -46,7 +35,7 @@ class CropRecipeSerializer(serializers.ModelSerializer):
         read_only_fields = ['__all__', ]
 
 
-class SubscribeSerializer(UserSerializer):
+class SubscribeSerializer(CustomUserSerializer):
     """ Сериализатор подписки. """
 
     is_subscribed = SerializerMethodField()
@@ -62,15 +51,14 @@ class SubscribeSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        return user.subscriber.filter(author=obj).exists()
+        return (not user.is_anonymous
+                and user.subscriber.filter(author=obj).exists())
 
     def get_recipes(self, obj):
         request = self.context.get('request')
         if not request or request.user.is_anonymous:
             return False
-        recipes = Recipe.objects.filter(author=obj)
+        recipes = obj.recipes.all()
         limit = request.query_params.get('recipes_limit')
         if limit:
             try:
@@ -84,12 +72,12 @@ class SubscribeSerializer(UserSerializer):
                                     context={'request': request}).data
 
     def get_recipes_count(self, obj):
-        return Recipe.objects.filter(author=obj).count()
+        return obj.recipes.count()
 
     def validate(self, data):
-        author = self.instance
+        author = data['author']
         user = self.context.get('request').user
-        if Subscription.objects.filter(author=author, user=user).exists():
+        if author.subscribers.filter(user=user).exists():
             raise serializers.ValidationError(
                 'Вы уже подписаны',
                 code=status.HTTP_400_BAD_REQUEST
