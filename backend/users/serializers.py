@@ -3,7 +3,7 @@ from rest_framework import serializers, status
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from recipes.models import Recipe
-from .models import Subscription, User
+from .models import User
 
 
 class CustomUserSerializer(ModelSerializer):

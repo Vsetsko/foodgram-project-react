@@ -5,8 +5,8 @@ from rest_framework.serializers import (IntegerField, ModelSerializer,
 
 from users.serializers import CustomUserSerializer
 from .fields import Base64ImageField, Hex2NameColor
-from .models import (Favorite, Ingredient, Recipe, RecipeIngredient, RecipeTag,
-                     ShoppingList, Tag)
+from .models import (Ingredient, Recipe, RecipeIngredient,
+                     RecipeTag, ShoppingList, Tag)
 
 
 class TagSerializer(ModelSerializer):
