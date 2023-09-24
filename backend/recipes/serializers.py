@@ -103,13 +103,35 @@ class CreateRecipeSerializer(ModelSerializer):
             'image', 'name', 'text', 'cooking_time'
         ]
 
+    def validate_tags(self, tags):
+        for tag in tags:
+            if not Tag.objects.filter(id=tag.id).exists():
+                raise serializers.ValidationError(
+                    'Указанного тега не существует')
+        return tags
+
+    def validate_cooking_time(self, cooking_time):
+        if cooking_time < 1:
+            raise serializers.ValidationError(
+                'Время готовки должно быть не меньше одной минуты')
+        return cooking_time
+
     def validate_ingredients(self, data):
         ingredients = []
+
+        if not data:
+            raise serializers.ValidationError('Ингридиенты отсутствуют')
+
         for ingredient in data:
-            if int(ingredient['amount']) < 1:
-                raise serializers.ValidationError({
-                    'amount': 'Должна быть хотя бы 1 единица ингредиента'
-                })
+            try:
+                if int(ingredient['amount']) < 1:
+                    raise serializers.ValidationError({
+                        'amount': 'Должна быть хотя бы 1 единица ингредиента'
+                    })
+            except ValueError:
+                raise serializers.ValidationError(
+                    'Количество ингредиента не является числом'
+                )
             if ingredient['id'] in ingredients:
                 raise serializers.ValidationError({
                     'ingredient': 'Ингредиенты не должны повторяться'

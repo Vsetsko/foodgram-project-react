@@ -56,6 +56,12 @@ class RecipeAdmin(admin.ModelAdmin):
         return ", ".join(
             [i for i in obj.ingredients.values_list('name', flat=True)])
 
+    def clean(self):
+        if not self.ingredients.exists():
+            raise ValueError("Необходимо добавить хотя бы один ингредиент")
+        if Recipe.objects.exclude(id=self.id).count() == 0:
+            raise ValueError("Нельзя удалить все рецепты")
+
 
 @admin.register(ShoppingList)
 class ShoppingCartAdmin(admin.ModelAdmin):

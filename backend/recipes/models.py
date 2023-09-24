@@ -32,7 +32,7 @@ class Ingredient(Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.name} {self.measurement_unit}"
+        return f'{self.name} {self.measurement_unit}'
 
 
 class Tag(Model):
@@ -124,7 +124,7 @@ class RecipeIngredient(Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.recipe} {self.ingredient}"
+        return f'{self.recipe} {self.ingredient}'
 
 
 class RecipeTag(Model):
@@ -151,7 +151,7 @@ class RecipeTag(Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.recipe} {self.tag}"
+        return f'{self.recipe} {self.tag}'
 
 
 class Favorite(Model):
@@ -181,7 +181,7 @@ class Favorite(Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.user} -> {self.recipe}"
+        return f'{self.user} -> {self.recipe}'
 
 
 class ShoppingList(Model):
@@ -211,4 +211,4 @@ class ShoppingList(Model):
         ]
 
     def __str__(self) -> str:
-        return f"{self.user} -> {self.recipe}"
+        return f'{self.user} -> {self.recipe}'

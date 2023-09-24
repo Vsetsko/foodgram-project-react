@@ -28,10 +28,7 @@ class UserViewSet(UserViewSet):
             serializer = SubscribeSerializer(
                 context=self.get_serializer_context()
             )
-            serializer(Subscription.objects.get_or_create(
-                user=subscriber,
-                author=author
-            )).save()
+            serializer().save()
             return Response(serializer.to_representation(
                 instance=author),
                 status=status.HTTP_201_CREATED

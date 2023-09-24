@@ -17,7 +17,7 @@ from .serializers import (CreateRecipeSerializer, FavoriteSerializer,
 from .utils import download_shopping_list
 
 
-class RecipeViewSet(AddDelMixin):
+class RecipeViewSet(viewsets.ModelViewSet, AddDelMixin):
     """ Отображение рецептов. """
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
@@ -35,7 +35,7 @@ class RecipeViewSet(AddDelMixin):
             permission_classes=[IsAuthenticated])
     def favorite(self, request, pk):
         """ Добавление/удаление рецепта из избранного. """
-        return AddDelMixin().add_del_recipe(
+        return self.add_del_recipe(
             request, pk, FavoriteSerializer, Favorite
         )
 
@@ -44,7 +44,7 @@ class RecipeViewSet(AddDelMixin):
     def shopping_cart(self, request, pk):
         """ Добавление/удаление рецепта из списка покупок. """
         serializer = ShoppingListSerializer
-        return AddDelMixin().add_del_recipe(
+        return self.add_del_recipe(
             request, pk, serializer, ShoppingList
         )
 

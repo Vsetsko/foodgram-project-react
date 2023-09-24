@@ -5,7 +5,7 @@ from .models import RecipeIngredient
 
 
 def download_shopping_list(request):
-    shopping_items = "Cписок покупок:"
+    shopping_items = 'Cписок покупок:'
     ingredients = RecipeIngredient.objects.filter(
         recipe__shopping__user=request.user
     ).values(

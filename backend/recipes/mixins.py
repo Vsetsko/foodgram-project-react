@@ -15,11 +15,12 @@ class AddDelMixin:
                 recipe, data=request.data, context={'request': request}
             )
             serializer.is_valid(raise_exception=True)
-            serializer(model.objects.create(user=user, recipe=recipe)).save()
+            serializer().save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            queryset = model.objects.filter(
+            queryset = get_object_or_404(
+                model,
                 user=user,
                 recipe=recipe
             )
