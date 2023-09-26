@@ -3,7 +3,7 @@ from rest_framework import serializers, status
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from recipes.models import Recipe
-from .models import User
+from .models import Subscription, User
 
 
 class CustomUserSerializer(ModelSerializer):
@@ -15,7 +15,7 @@ class CustomUserSerializer(ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'username', 'first_name',
-            'last_name', 'password', 'is_subscribed'
+            'last_name', 'is_subscribed'
         ]
 
     def get_is_subscribed(self, obj):
@@ -26,7 +26,7 @@ class CustomUserSerializer(ModelSerializer):
         )
 
 
-class CropRecipeSerializer(serializers.ModelSerializer):
+class CropRecipeSerializer(ModelSerializer):
     """ Укороченный сериализатор рецепта. """
 
     class Meta:
@@ -38,15 +38,11 @@ class CropRecipeSerializer(serializers.ModelSerializer):
 class SubscribeSerializer(CustomUserSerializer):
     """ Сериализатор подписки. """
 
-    is_subscribed = SerializerMethodField()
     recipes = SerializerMethodField()
     recipes_count = SerializerMethodField()
 
     class Meta(UserSerializer.Meta):
-        fields = [
-            'id', 'email', 'username', 'first_name', 'last_name',
-            'is_subscribed', 'recipes', 'recipes_count'
-        ]
+        fields = UserSerializer.Meta.fields + ['recipes', 'recipes_count']
         read_only_fields = ['email', 'username', 'first_name', 'last_name']
 
     def get_is_subscribed(self, obj):
@@ -74,9 +70,18 @@ class SubscribeSerializer(CustomUserSerializer):
     def get_recipes_count(self, obj):
         return obj.recipes.count()
 
+
+class SubscriptionSerializer(ModelSerializer):
+    class Meta:
+        model = Subscription
+        fields = [
+            'user',
+            'author',
+        ]
+
     def validate(self, data):
         author = data['author']
-        user = self.context.get('request').user
+        user = data['user']
         if author.subscribers.filter(user=user).exists():
             raise serializers.ValidationError(
                 'Вы уже подписаны',

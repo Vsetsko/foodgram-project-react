@@ -20,7 +20,6 @@ from .utils import download_shopping_list
 class RecipeViewSet(viewsets.ModelViewSet, AddDelMixin):
     """ Отображение рецептов. """
     queryset = Recipe.objects.all()
-    serializer_class = RecipeSerializer
     permission_classes = (IsAuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend, OrderingFilter)
     filterset_class = RecipeFilter
@@ -43,9 +42,8 @@ class RecipeViewSet(viewsets.ModelViewSet, AddDelMixin):
             permission_classes=[IsAuthenticated],)
     def shopping_cart(self, request, pk):
         """ Добавление/удаление рецепта из списка покупок. """
-        serializer = ShoppingListSerializer
         return self.add_del_recipe(
-            request, pk, serializer, ShoppingList
+            request, pk, ShoppingListSerializer, ShoppingList
         )
 
     @action(detail=False, permission_classes=[IsAuthenticated])

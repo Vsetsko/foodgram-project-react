@@ -19,14 +19,11 @@ class AddDelMixin:
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         if request.method == 'DELETE':
-            queryset = get_object_or_404(
+            obj = get_object_or_404(
                 model,
                 user=user,
                 recipe=recipe
             )
-            if queryset.exists():
-                queryset.delete()
-            else:
-                return Response(status=status.HTTP_404_NOT_FOUND)
+            obj.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)

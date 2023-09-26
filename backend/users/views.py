@@ -8,7 +8,7 @@ from rest_framework.serializers import ListSerializer
 
 from recipes.pagination import SimplePagination
 from .models import Subscription, User
-from .serializers import SubscribeSerializer
+from .serializers import SubscribeSerializer, SubscriptionSerializer
 
 
 class UserViewSet(UserViewSet):
@@ -22,19 +22,19 @@ class UserViewSet(UserViewSet):
     )
     def subscribe(self, request, id):
         author = get_object_or_404(User, id=id)
-        subscriber = request.user
 
         if request.method == 'POST':
-            serializer = SubscribeSerializer(
+            serializer = SubscriptionSerializer(
                 context=self.get_serializer_context()
             )
+            serializer.is_valid(raise_exception=True)
             serializer().save()
-            return Response(serializer.to_representation(
-                instance=author),
+            return Response(
+                serializer.data,
                 status=status.HTTP_201_CREATED
             )
         Subscription.objects.filter(
-            user=subscriber, author=author
+            user=request.user, author=author
         ).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -44,9 +44,7 @@ class UserViewSet(UserViewSet):
         queryset = User.objects.filter(author__user=request.user)
         authors = self.paginate_queryset(queryset)
         serializer = ListSerializer(
-            child=SubscribeSerializer(),
-            context=self.get_serializer_context()
+            child=SubscribeSerializer(authors),
+            context=self.get_serializer_context(),
         )
-        return self.get_paginated_response(
-            serializer.to_representation(authors)
-        )
+        return self.get_paginated_response(serializer.data)

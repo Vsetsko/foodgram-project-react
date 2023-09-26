@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
 from rest_framework.serializers import (IntegerField, ModelSerializer,
@@ -95,6 +96,7 @@ class CreateRecipeSerializer(ModelSerializer):
         queryset=Tag.objects.all(), many=True
     )
     image = Base64ImageField()
+    cooking_time = serializers.IntegerField()
 
     class Meta:
         model = Recipe
@@ -111,7 +113,7 @@ class CreateRecipeSerializer(ModelSerializer):
         return tags
 
     def validate_cooking_time(self, cooking_time):
-        if cooking_time < 1:
+        if cooking_time < settings.MIN_VALUE_COOKING_TIME:
             raise serializers.ValidationError(
                 'Время готовки должно быть не меньше одной минуты')
         return cooking_time
@@ -124,7 +126,7 @@ class CreateRecipeSerializer(ModelSerializer):
 
         for ingredient in data:
             try:
-                if int(ingredient['amount']) < 1:
+                if int(ingredient['amount']) < settings.MIN_VALUE_INGREDIENT:
                     raise serializers.ValidationError({
                         'amount': 'Должна быть хотя бы 1 единица ингредиента'
                     })

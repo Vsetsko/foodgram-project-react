@@ -47,20 +47,20 @@ class RecipeAdmin(admin.ModelAdmin):
     @admin.display(description='Теги')
     def get_tags(self, obj):
         """Отображает в админке теги каждого рецепта"""
-        return ", ".join(
+        return ', '.join(
             [t for t in obj.tags.values_list('name', flat=True)])
 
     @admin.display(description='Ингредиенты')
     def get_ingredients(self, obj):
         """Отображает в админке ингредиенты каждого рецепта"""
-        return ", ".join(
+        return ', '.join(
             [i for i in obj.ingredients.values_list('name', flat=True)])
 
     def clean(self):
         if not self.ingredients.exists():
-            raise ValueError("Необходимо добавить хотя бы один ингредиент")
+            raise ValueError('Необходимо добавить хотя бы один ингредиент')
         if Recipe.objects.exclude(id=self.id).count() == 0:
-            raise ValueError("Нельзя удалить все рецепты")
+            raise ValueError('Нельзя удалить все рецепты')
 
 
 @admin.register(ShoppingList)
