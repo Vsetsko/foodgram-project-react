@@ -10,7 +10,7 @@ class RecipeForm(forms.ModelForm):
         fields = '__all__'
 
     def clean_ingredients(self):
-        ingredients = self.cleaned_data.get('ingredients', None)
+        ingredients = self.cleaned_data['ingredients']
         if not ingredients:
             raise ValidationError(
                 'Необходимо добавить хотя бы один ингредиент'
@@ -20,7 +20,7 @@ class RecipeForm(forms.ModelForm):
         return ingredients
 
     def clean_ingredients(self):
-        tags = self.cleaned_data.get('tags', None)
+        tags = self.cleaned_data['tags']
         if not tags:
             raise ValidationError('Необходимо добавить хотя бы один тэг')
         return tags
