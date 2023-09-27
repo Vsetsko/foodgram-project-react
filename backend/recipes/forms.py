@@ -1,3 +1,5 @@
+import logging
+
 from django import forms
 from django.forms import ValidationError
 
@@ -11,7 +13,7 @@ class RecipeForm(forms.ModelForm):
 
     def clean_ingredients(self):
         ingredients = self.cleaned_data['ingredients']
-        print(ingredients)
+        logging.critical(ingredients)
         if not ingredients:
             raise ValidationError(
                 'Необходимо добавить хотя бы один ингредиент'
@@ -20,7 +22,7 @@ class RecipeForm(forms.ModelForm):
             raise ValidationError('Нельзя удалить все рецепты')
         return ingredients
 
-    def clean_ingredients(self):
+    def clean_tags(self):
         tags = self.cleaned_data['tags']
         if not tags:
             raise ValidationError('Необходимо добавить хотя бы один тэг')
