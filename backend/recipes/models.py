@@ -6,7 +6,7 @@ from django.db.models import (CASCADE, CharField, DateTimeField, ForeignKey,
                               UniqueConstraint)
 
 from users.models import User
-from validators import validate_hex
+from .validators import validate_hex
 
 
 class Ingredient(Model):
