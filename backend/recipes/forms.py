@@ -13,7 +13,6 @@ class RecipeForm(forms.ModelForm):
 
     def clean_ingredients(self):
         ingredients = self.cleaned_data['ingredients']
-        logging.critical(ingredients)
         if not ingredients:
             raise ValidationError(
                 'Необходимо добавить хотя бы один ингредиент'
