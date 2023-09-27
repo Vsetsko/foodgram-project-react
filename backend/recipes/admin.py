@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from .forms import RecipeForm
 from .models import (Favorite, Ingredient, Recipe, RecipeIngredient, RecipeTag,
                      ShoppingList, Tag)
 
@@ -39,6 +40,7 @@ class RecipeAdmin(admin.ModelAdmin):
     inlines = (
         IngredientsInLine, TagsInline
     )
+    form = RecipeForm
 
     @admin.display(description='В избранном')
     def favorites(self, obj):
@@ -55,14 +57,6 @@ class RecipeAdmin(admin.ModelAdmin):
         """Отображает в админке ингредиенты каждого рецепта"""
         return ', '.join(
             [i for i in obj.ingredients.values_list('name', flat=True)])
-
-    def clean(self):
-        if not self.ingredients.exists():
-            raise ValueError('Необходимо добавить хотя бы один ингредиент')
-        if not self.tags.exists():
-            raise ValueError('Необходимо добавить хотя бы один тэг')
-        if Recipe.objects.exclude(id=self.id).count() == 0:
-            raise ValueError('Нельзя удалить все рецепты')
 
 
 @admin.register(ShoppingList)
