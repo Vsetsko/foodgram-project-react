@@ -60,10 +60,7 @@ class SubscribeSerializer(CustomUserSerializer):
             try:
                 recipes = recipes[:int(limit)]
             except ValueError:
-                raise serializers.ValidationError(
-                    'Не удалось получить рецепты',
-                    code=status.HTTP_400_BAD_REQUEST
-                )
+                pass
         return CropRecipeSerializer(recipes, many=True,
                                     context={'request': request}).data
 
