@@ -113,7 +113,13 @@ class RecipeIngredient(Model):
         verbose_name='Ингредиент',
         related_name='recipe_ingredients'
     )
-    amount = PositiveSmallIntegerField(settings.ENTER_QUANTITY_INGREDIENTS)
+    amount = PositiveSmallIntegerField(
+        settings.ENTER_QUANTITY_INGREDIENTS,
+        validators=[MinValueValidator(
+            settings.MIN_VALUE_INGREDIENT,
+            message='Должна быть хотя бы 1 единица ингредиента'
+        )]
+    )
 
     class Meta:
         constraints = [
@@ -139,7 +145,8 @@ class RecipeTag(Model):
     tag = ForeignKey(
         Tag,
         on_delete=CASCADE,
-        verbose_name='Тег'
+        verbose_name='Тег',
+        blank=False
     )
 
     class Meta:
