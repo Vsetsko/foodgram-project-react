@@ -1,4 +1,5 @@
 from django import forms
+from django.forms import ValidationError
 
 from .models import Recipe
 
@@ -6,8 +7,10 @@ from .models import Recipe
 class RecipeForm(forms.ModelForm):
     def clean(self):
         if not self.ingredients.exists():
-            raise ValueError('Необходимо добавить хотя бы один ингредиент')
+            raise ValidationError(
+                'Необходимо добавить хотя бы один ингредиент'
+            )
         if not self.tags.exists():
-            raise ValueError('Необходимо добавить хотя бы один тэг')
+            raise ValidationError('Необходимо добавить хотя бы один тэг')
         if Recipe.objects.exclude(id=self.id).count() == 0:
-            raise ValueError('Нельзя удалить все рецепты')
+            raise ValidationError('Нельзя удалить все рецепты')
