@@ -17,7 +17,7 @@ services:
       - ./.env
 
   web:
-    image: vsetsko/foodgram:latest
+    image: vsetsko/foodgram_backend:latest
     restart: always
     volumes:
       - static_value:/app/static/
