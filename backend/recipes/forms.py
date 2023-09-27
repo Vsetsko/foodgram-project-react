@@ -10,11 +10,13 @@ class RecipeForm(forms.ModelForm):
         fields = '__all__'
 
     def clean(self):
-        if not self.cleaned_data['ingredients']:
+        cleaned_data = super().clean()
+        if not cleaned_data['ingredients']:
             raise ValidationError(
                 'Необходимо добавить хотя бы один ингредиент'
             )
-        if not self.cleaned_data['tags']:
+        if not cleaned_data['tags']:
             raise ValidationError('Необходимо добавить хотя бы один тэг')
         if Recipe.objects.exclude(id=self.id).count() == 0:
             raise ValidationError('Нельзя удалить все рецепты')
+        return cleaned_data
