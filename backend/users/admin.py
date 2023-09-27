@@ -12,18 +12,8 @@ class UserAdmin(admin.ModelAdmin):
     list_filter = ['username', 'email']
     fieldsets = (
         (None, {'fields': (
-            'email', 'username', 'first_name', 'last_name', 'password',
+            'email', 'username', 'first_name', 'last_name',
         )}),
-        ('Permissions', {'fields': ('is_blocked', 'is_superuser',)})
-    )
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': (
-                'email', 'username', 'first_name', 'last_name', 'password1',
-                'password2', 'is_blocked', 'is_superuser',
-            )
-        }),
     )
     ordering = ['username']
     empty_value_display = empty
