@@ -9,11 +9,13 @@ empty = 'пусто'
 class IngredientsInLine(admin.TabularInline):
     model = RecipeIngredient
     extra = 1
+    min_num = 1
 
 
 class TagsInline(admin.TabularInline):
     model = RecipeTag
     extra = 1
+    min_num = 1
 
 
 @admin.register(Favorite)
@@ -53,13 +55,10 @@ class RecipeAdmin(admin.ModelAdmin):
     @admin.display(description='Ингредиенты')
     def get_ingredients(self, obj):
         """Отображает в админке ингредиенты каждого рецепта"""
-        return ', '
+        return ', '.join(
+            [i for i in obj.ingredients.values_list('name', flat=True)])
 
     def clean(self):
-        if not self.ingredients.exists():
-            raise ValueError('Необходимо добавить хотя бы один ингредиент')
-        if not self.tags.exists():
-            raise ValueError('Необходимо добавить хотя бы один тэг')
         if Recipe.objects.exclude(id=self.id).count() == 0:
             raise ValueError('Нельзя удалить все рецепты')
 
