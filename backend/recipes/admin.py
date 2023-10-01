@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from .forms import IngredientTagInLineFormset
 from .models import (Favorite, Ingredient, Recipe, RecipeIngredient, RecipeTag,
                      ShoppingList, Tag)
 
@@ -8,12 +9,14 @@ empty = 'пусто'
 
 class IngredientsInLine(admin.TabularInline):
     model = RecipeIngredient
+    formset = IngredientTagInLineFormset
     extra = 1
     min_num = 1
 
 
 class TagsInline(admin.TabularInline):
     model = RecipeTag
+    formset = IngredientTagInLineFormset
     extra = 1
     min_num = 1
 
@@ -57,10 +60,6 @@ class RecipeAdmin(admin.ModelAdmin):
         """Отображает в админке ингредиенты каждого рецепта"""
         return ', '.join(
             [i for i in obj.ingredients.values_list('name', flat=True)])
-
-    def clean(self):
-        if Recipe.objects.exclude(id=self.id).count() == 0:
-            raise ValueError('Нельзя удалить все рецепты')
 
 
 @admin.register(ShoppingList)
